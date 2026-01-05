@@ -19,13 +19,21 @@ public static class ApplicationBuilderExtensions
                 options.SwaggerEndpoint("/swagger/v1/swagger.json", "Course Platform API v1");
                 options.RoutePrefix = "swagger";
             });
-
-            await app.ApplyMigrationsAsync();
-            await app.SeedDataAsync();
+        }
+        else
+        {
+            app.UseSwagger();
+            app.UseSwaggerUI(options =>
+            {
+                options.SwaggerEndpoint("/swagger/v1/swagger.json", "Course Platform API v1");
+                options.RoutePrefix = "swagger";
+            });
         }
 
-        app.UseCors("AllowFrontend");
-        app.UseHttpsRedirection();
+        await app.ApplyMigrationsAsync();
+        await app.SeedDataAsync();
+
+        app.UseCors("AllowAll");
         app.UseAuthentication();
         app.UseAuthorization();
 
@@ -37,10 +45,18 @@ public static class ApplicationBuilderExtensions
         using var scope = app.ApplicationServices.CreateScope();
         var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         
-        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
-        if (pendingMigrations.Any())
+        try
         {
-            await context.Database.MigrateAsync();
+            var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
+            if (pendingMigrations.Any())
+            {
+                await context.Database.MigrateAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<ApplicationDbContext>>();
+            logger.LogError(ex, "Error al aplicar migraciones");
         }
 
         return app;
@@ -51,7 +67,15 @@ public static class ApplicationBuilderExtensions
         using var scope = app.ApplicationServices.CreateScope();
         var serviceProvider = scope.ServiceProvider;
         
-        await DataSeeder.SeedAsync(serviceProvider);
+        try
+        {
+            await DataSeeder.SeedAsync(serviceProvider);
+        }
+        catch (Exception ex)
+        {
+            var logger = scope.ServiceProvider.GetRequiredService<ILogger<ApplicationDbContext>>();
+            logger.LogError(ex, "Error al ejecutar el seeder");
+        }
 
         return app;
     }

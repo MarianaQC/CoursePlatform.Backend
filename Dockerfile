@@ -25,24 +25,14 @@ RUN dotnet publish "CoursePlatform.Api.csproj" -c Release -o /app/publish /p:Use
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final
 WORKDIR /app
 
-# Crear usuario no-root para seguridad
-RUN adduser --disabled-password --gecos '' appuser
-
 # Copiar archivos publicados
 COPY --from=publish /app/publish .
 
-# Cambiar permisos
-RUN chown -R appuser:appuser /app
-
-# Cambiar a usuario no-root
-USER appuser
-
-# Exponer puertos
-EXPOSE 5000
-EXPOSE 5001
+# Exponer puerto
+EXPOSE 8080
 
 # Variables de entorno
-ENV ASPNETCORE_URLS=http://+:5000
+ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
 # Comando de inicio
