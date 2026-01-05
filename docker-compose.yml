@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: courseplatform-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: Qwe.123*
+      MYSQL_DATABASE: CoursePlatform_DB
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - courseplatform-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-pQwe.123*"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: courseplatform-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=CoursePlatform_DB;User=root;Password=Qwe.123*;
+      - JwtSettings__SecretKey=a-very-secure-secret-key-with-at-least-256-bits-for-production-use-only
+      - JwtSettings__Issuer=CoursePlatform
+      - JwtSettings__Audience=CoursePlatformUsers
+      - JwtSettings__ExpirationDays=7
+    ports:
+      - "5000:5000"
+    networks:
+      - courseplatform-network
+    depends_on:
+      mysql:
+        condition: service_healthy
+    restart: unless-stopped
+
+networks:
+  courseplatform-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+    driver: local

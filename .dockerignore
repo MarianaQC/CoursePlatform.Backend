@@ -1,0 +1,56 @@
+# Directorios de compilación
+**/bin/
+**/obj/
+**/out/
+
+# Directorios de IDE
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Archivos de NuGet
+**/packages/
+*.nupkg
+
+# Archivos de test
+**/TestResults/
+**/coverage/
+
+# Archivos temporales
+*.tmp
+*.temp
+*.log
+*.cache
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+docker-compose*
+.docker/
+
+# Documentación local
+*.md
+!README.md
+
+# Archivos de configuración local
+appsettings.Development.json
+appsettings.Local.json
+*.local.json
+
+# Directorios de publicación
+**/publish/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Migraciones (opcional, descomentar si no quieres incluirlas)
+# **/Migrations/
